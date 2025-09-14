@@ -20,6 +20,7 @@ public class Employee {
     private String firstName;
     private String lastName;
     private String email;
+    private String password; // Campo agregado para autenticación
     private Department department;
     private Role role;
     private LocalDate hireDate;
@@ -32,17 +33,19 @@ public class Employee {
      * @param firstName Nombre del empleado
      * @param lastName Apellido del empleado
      * @param email Correo electrónico del empleado (debe ser único)
+     * @param password Contraseña encriptada del empleado
      * @param department Departamento al que pertenece el empleado
      * @param role Rol o posición del empleado
      * @param hireDate Fecha de contratación
      * @param vacationDays Días de vacaciones disponibles
      */
-    public Employee(UUID id, String firstName, String lastName, String email,
+    public Employee(UUID id, String firstName, String lastName, String email, String password,
                     Department department, Role role, LocalDate hireDate, int vacationDays) {
         this.id = id;
         this.firstName = firstName;
         this.lastName = lastName;
         this.email = email;
+        this.password = password;
         this.department = department;
         this.role = role;
         this.hireDate = hireDate;
@@ -64,6 +67,10 @@ public class Employee {
 
     public String getEmail() {
         return email;
+    }
+
+    public String getPassword() {
+        return password;
     }
 
     public Department getDepartment() {
