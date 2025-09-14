@@ -13,4 +13,15 @@ public interface LeaveRepository {
     List<Leave> findByDateRange(LocalDate start, LocalDate end);
     Optional<Leave> findById(UUID id);
     void deleteById(UUID id);
+
+    /**
+     * Busca permisos que se solapen con el rango de fechas especificado para un empleado.
+     *
+     * @param employeeId ID del empleado
+     * @param startDate Fecha de inicio del rango
+     * @param endDate Fecha de fin del rango
+     * @param excludeLeaveId ID del permiso a excluir de la búsqueda (útil para actualizaciones)
+     * @return Lista de permisos que se solapan
+     */
+    List<Leave> findOverlappingLeaves(UUID employeeId, LocalDate startDate, LocalDate endDate, UUID excludeLeaveId);
 }

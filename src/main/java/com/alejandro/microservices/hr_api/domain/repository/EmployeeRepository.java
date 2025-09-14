@@ -19,4 +19,6 @@ public interface EmployeeRepository {
     List<Employee> findByDepartmentId(UUID departmentId);
 
     List<Employee> findByRoleId(UUID roleId);
+
+    Optional<Employee> findByEmail(String email);
 }

@@ -16,6 +16,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -146,7 +147,27 @@ public class EmployeeService {
 
     public EmployeeResponseDTO updateEmployee(UUID id, EmployeeRequestDTO request) {
         validateId(id, "El ID del empleado no puede ser nulo");
-        validateEmployeeRequest(request);
+
+        // Validar datos básicos primero
+        if (request == null) {
+            throw new IllegalArgumentException("Los datos del empleado no pueden ser nulos");
+        }
+
+        if (request.firstName() == null || request.firstName().trim().isEmpty()) {
+            throw new IllegalArgumentException("El nombre no puede estar vacío");
+        }
+        if (request.lastName() == null || request.lastName().trim().isEmpty()) {
+            throw new IllegalArgumentException("El apellido no puede estar vacío");
+        }
+        if (request.email() == null || request.email().trim().isEmpty()) {
+            throw new IllegalArgumentException("El email no puede estar vacío");
+        }
+        if (!isValidEmail(request.email())) {
+            throw new IllegalArgumentException("El formato del email no es válido");
+        }
+
+        // VALIDACIÓN DE EMAIL ÚNICO para updates - excluir el empleado actual
+        validateUniqueEmail(request.email(), id);
 
         Employee existingEmployee = employeeRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Empleado no encontrado"));
@@ -257,6 +278,10 @@ public class EmployeeService {
         if (!isValidEmail(request.email())) {
             throw new IllegalArgumentException("El formato del email no es válido");
         }
+
+        // NUEVA VALIDACIÓN: Email único
+        validateUniqueEmail(request.email(), null);
+
         if (request.departmentId() == null) {
             throw new IllegalArgumentException("El ID del departamento no puede ser nulo");
         }
@@ -289,8 +314,30 @@ public class EmployeeService {
         if (!isValidEmail(email)) {
             throw new IllegalArgumentException("El formato del email no es válido");
         }
+
+        // NUEVA VALIDACIÓN: Email único
+        validateUniqueEmail(email, null);
+
         validateId(departmentId, "El ID del departamento no puede ser nulo");
         validateId(roleId, "El ID del rol no puede ser nulo");
+    }
+
+    /**
+     * Valida que el email sea único en el sistema.
+     *
+     * @param email Email a validar
+     * @param excludeEmployeeId ID del empleado a excluir de la validación (para updates)
+     * @throws IllegalArgumentException si el email ya existe
+     */
+    private void validateUniqueEmail(String email, UUID excludeEmployeeId) {
+        Optional<Employee> existingEmployee = employeeRepository.findByEmail(email);
+
+        if (existingEmployee.isPresent()) {
+            // Si es una actualización, excluir el empleado actual
+            if (excludeEmployeeId == null || !existingEmployee.get().getId().equals(excludeEmployeeId)) {
+                throw new IllegalArgumentException("El correo ya está registrado para otro empleado");
+            }
+        }
     }
 
     private void validateId(UUID id, String message) {

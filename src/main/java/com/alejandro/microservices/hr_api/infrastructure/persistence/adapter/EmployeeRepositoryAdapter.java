@@ -50,18 +50,21 @@ public class EmployeeRepositoryAdapter implements EmployeeRepository {
 
     @Override
     public List<Employee> findByDepartmentId(UUID departmentId) {
-        return jpaRepository.findByDepartment_Id(departmentId)
-                .stream()
+        return jpaRepository.findByDepartment_Id(departmentId).stream()
                 .map(this::mapToDomain)
                 .collect(Collectors.toList());
     }
 
     @Override
     public List<Employee> findByRoleId(UUID roleId) {
-        return jpaRepository.findByRole_Id(roleId)
-                .stream()
+        return jpaRepository.findByRole_Id(roleId).stream()
                 .map(this::mapToDomain)
                 .collect(Collectors.toList());
+    }
+
+    @Override
+    public Optional<Employee> findByEmail(String email) {
+        return jpaRepository.findByEmail(email).map(this::mapToDomain);
     }
 
     // Métodos de mapeo

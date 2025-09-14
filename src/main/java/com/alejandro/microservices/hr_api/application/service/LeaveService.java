@@ -53,21 +53,28 @@ public class LeaveService {
      * - La fecha de inicio debe ser anterior a la fecha de fin
      * - Para vacaciones, no se permiten fechas en el pasado
      * - Las licencias médicas pueden tener fechas retroactivas
+     * - No se permiten permisos solapados para el mismo empleado
      *
      * @param request DTO con los datos del permiso a solicitar
      * @return DTO con los datos del permiso creado
      * @throws IllegalArgumentException si las validaciones fallan
      */
     public LeaveResponseDTO requestLeave(LeaveRequestDTO request) {
+        // Validar datos de entrada
+        validateLeaveRequest(request);
+
         // Validar que la fecha de inicio sea anterior a la fecha de fin
-        if (request.startDate().isAfter(request.endDate())) {
-            throw new IllegalArgumentException("La fecha de inicio debe ser anterior a la fecha de fin");
+        if (request.endDate().isBefore(request.startDate())) {
+            throw new IllegalArgumentException("La fecha de fin no puede ser anterior a la fecha de inicio");
         }
 
         // Validar que las fechas no sean en el pasado (excepto para licencias médicas)
         if (request.type() != LeaveType.SICK && request.startDate().isBefore(LocalDate.now())) {
             throw new IllegalArgumentException("No se pueden solicitar permisos con fechas pasadas");
         }
+
+        // NUEVA VALIDACIÓN: Verificar solapamiento de permisos
+        validateDateOverlap(request.employeeId(), request.startDate(), request.endDate(), null);
 
         // Crear entidad de dominio
         Leave leave = new Leave(
@@ -154,5 +161,52 @@ public class LeaveService {
                 leave.getEndDate(),
                 leave.getType()
         );
+    }
+
+    /**
+     * Valida los datos de una solicitud de permiso.
+     *
+     * @param request DTO con los datos del permiso a validar
+     * @throws IllegalArgumentException si los datos son inválidos
+     */
+    private void validateLeaveRequest(LeaveRequestDTO request) {
+        // NUEVA VALIDACIÓN: Verificar que el request no sea nulo
+        if (request == null) {
+            throw new IllegalArgumentException("Los datos del permiso no pueden ser nulos");
+        }
+
+        // Validar que el empleado exista
+        // (suponiendo que hay un servicio o repositorio para validar empleados)
+        /*
+        if (!employeeExists(request.employeeId())) {
+            throw new IllegalArgumentException("Empleado no encontrado");
+        }
+        */
+
+        // Validar que la fecha de inicio y fin no sean nulas
+        if (request.startDate() == null || request.endDate() == null) {
+            throw new IllegalArgumentException("Las fechas de inicio y fin son requeridas");
+        }
+
+        // Validar que el tipo de permiso no sea nulo
+        if (request.type() == null) {
+            throw new IllegalArgumentException("El tipo de permiso es requerido");
+        }
+    }
+
+    /**
+     * Valida que no haya solapamiento de permisos en las fechas especificadas.
+     *
+     * @param employeeId UUID del empleado
+     * @param start Fecha de inicio del nuevo permiso
+     * @param end Fecha de fin del nuevo permiso
+     * @param excludeLeaveId UUID de un permiso a excluir de la validación (por ejemplo, al editar un permiso)
+     * @throws IllegalArgumentException si hay solapamiento de fechas
+     */
+    private void validateDateOverlap(UUID employeeId, LocalDate start, LocalDate end, UUID excludeLeaveId) {
+        List<Leave> overlappingLeaves = leaveRepository.findOverlappingLeaves(employeeId, start, end, excludeLeaveId);
+        if (!overlappingLeaves.isEmpty()) {
+            throw new IllegalArgumentException("El permiso se solapa con otros permisos existentes");
+        }
     }
 }

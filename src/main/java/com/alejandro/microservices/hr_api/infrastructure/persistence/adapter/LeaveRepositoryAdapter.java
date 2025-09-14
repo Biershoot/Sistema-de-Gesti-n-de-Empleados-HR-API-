@@ -52,6 +52,25 @@ public class LeaveRepositoryAdapter implements LeaveRepository {
         jpaRepository.deleteById(id);
     }
 
+    @Override
+    public List<Leave> findOverlappingLeaves(UUID employeeId, LocalDate startDate, LocalDate endDate, UUID excludeLeaveId) {
+        List<LeaveEntity> overlappingEntities;
+
+        if (excludeLeaveId != null) {
+            // Para actualizaciones, excluir el permiso actual
+            overlappingEntities = jpaRepository.findOverlappingLeavesExcluding(
+                    employeeId, startDate, endDate, excludeLeaveId);
+        } else {
+            // Para nuevos permisos
+            overlappingEntities = jpaRepository.findOverlappingLeaves(
+                    employeeId, startDate, endDate);
+        }
+
+        return overlappingEntities.stream()
+                .map(this::mapToDomain)
+                .collect(Collectors.toList());
+    }
+
     private LeaveEntity mapToEntity(Leave leave) {
         return new LeaveEntity(
                 leave.getId(),

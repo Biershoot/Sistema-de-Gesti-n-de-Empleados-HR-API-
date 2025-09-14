@@ -5,6 +5,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 @Repository
@@ -13,4 +14,7 @@ public interface JpaEmployeeRepository extends JpaRepository<EmployeeEntity, UUI
     List<EmployeeEntity> findByDepartment_Id(UUID departmentId);
 
     List<EmployeeEntity> findByRole_Id(UUID roleId);
+
+    // Método para buscar empleado por email
+    Optional<EmployeeEntity> findByEmail(String email);
 }
