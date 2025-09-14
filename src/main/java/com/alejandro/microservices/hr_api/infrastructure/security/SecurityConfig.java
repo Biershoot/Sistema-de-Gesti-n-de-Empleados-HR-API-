@@ -17,16 +17,16 @@ import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 /**
- * Configuración principal de seguridad para la aplicación HR API.
+ * Configuracion principal de seguridad para la aplicacion HR API.
  *
  * Funcionalidades implementadas:
- * - Autenticación basada en JWT (sin sesiones)
- * - Autorización por roles (ADMIN, USER)
- * - Endpoints públicos para autenticación
- * - Protección de endpoints administrativos
+ * - Autenticacion basada en JWT (sin sesiones)
+ * - Autorizacion por roles (ADMIN, USER)
+ * - Endpoints publicos para autenticacion
+ * - Proteccion de endpoints administrativos
  *
  * Rutas configuradas:
- * - /auth/** : Público (login, registro)
+ * - /auth/** : Publico (login, registro)
  * - /api/reports/** : Solo ADMIN
  * - /api/** : Usuarios autenticados
  */
@@ -45,11 +45,11 @@ public class SecurityConfig {
     }
 
     /**
-     * Configuración principal de la cadena de filtros de seguridad.
+     * Configuracion principal de la cadena de filtros de seguridad.
      *
      * @param http Configurador de seguridad HTTP
      * @return Cadena de filtros configurada
-     * @throws Exception Error en configuración
+     * @throws Exception Error en configuracion
      */
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
@@ -57,9 +57,9 @@ public class SecurityConfig {
             // Deshabilitar CSRF para APIs REST
             .csrf(csrf -> csrf.disable())
 
-            // Configurar autorización de rutas
+            // Configurar autorizacion de rutas
             .authorizeHttpRequests(auth -> auth
-                // Rutas públicas
+                // Rutas publicas
                 .requestMatchers("/auth/**").permitAll()
                 .requestMatchers("/api/auth/**").permitAll()
                 .requestMatchers("/h2-console/**").permitAll() // Para testing
@@ -68,7 +68,7 @@ public class SecurityConfig {
                 .requestMatchers("/api/reports/**").hasRole("ADMIN")
                 .requestMatchers("/api/employees/*/vacation").hasAnyRole("ADMIN", "HR")
 
-                // Todas las demás rutas requieren autenticación
+                // Todas las demas rutas requieren autenticacion
                 .anyRequest().authenticated()
             )
 
@@ -77,16 +77,16 @@ public class SecurityConfig {
                 session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
             )
 
-            // Agregar filtro JWT antes del filtro de autenticación estándar
+            // Agregar filtro JWT antes del filtro de autenticacion estandar
             .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
     }
 
     /**
-     * Proveedor de autenticación que utiliza UserDetailsService y PasswordEncoder.
+     * Proveedor de autenticacion que utiliza UserDetailsService y PasswordEncoder.
      *
-     * @return Proveedor de autenticación configurado
+     * @return Proveedor de autenticacion configurado
      */
     @Bean
     public AuthenticationProvider authenticationProvider() {
@@ -97,11 +97,11 @@ public class SecurityConfig {
     }
 
     /**
-     * Gestor de autenticación principal.
+     * Gestor de autenticacion principal.
      *
-     * @param config Configuración de autenticación
-     * @return Gestor de autenticación
-     * @throws Exception Error en configuración
+     * @param config Configuracion de autenticacion
+     * @return Gestor de autenticacion
+     * @throws Exception Error en configuracion
      */
     @Bean
     public AuthenticationManager authenticationManager(AuthenticationConfiguration config) throws Exception {

@@ -20,6 +20,9 @@ public class EmployeeEntity {
     @Column(nullable = false, unique = true, length = 100)
     private String email;
 
+    @Column(nullable = false, length = 255)
+    private String password;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "department_id", nullable = false)
     private DepartmentEntity department;
@@ -37,13 +40,14 @@ public class EmployeeEntity {
     // Constructor por defecto requerido por JPA
     public EmployeeEntity() {}
 
-    public EmployeeEntity(UUID id, String firstName, String lastName, String email,
+    public EmployeeEntity(UUID id, String firstName, String lastName, String email, String password,
                           DepartmentEntity department, RoleEntity role,
                           LocalDate hireDate, int vacationDays) {
         this.id = id;
         this.firstName = firstName;
         this.lastName = lastName;
         this.email = email;
+        this.password = password;
         this.department = department;
         this.role = role;
         this.hireDate = hireDate;
@@ -65,6 +69,10 @@ public class EmployeeEntity {
 
     public String getEmail() {
         return email;
+    }
+
+    public String getPassword() {
+        return password;
     }
 
     public DepartmentEntity getDepartment() {
@@ -98,6 +106,10 @@ public class EmployeeEntity {
 
     public void setEmail(String email) {
         this.email = email;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
     }
 
     public void setDepartment(DepartmentEntity department) {

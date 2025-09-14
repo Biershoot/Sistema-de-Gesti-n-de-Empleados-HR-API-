@@ -84,6 +84,7 @@ public class EmployeeRepositoryAdapter implements EmployeeRepository {
                 employee.getFirstName(),
                 employee.getLastName(),
                 employee.getEmail(),
+                employee.getPassword(), // Agregar password al constructor
                 departmentEntity,
                 roleEntity,
                 employee.getHireDate(),
@@ -107,6 +108,7 @@ public class EmployeeRepositoryAdapter implements EmployeeRepository {
                 entity.getFirstName(),
                 entity.getLastName(),
                 entity.getEmail(),
+                entity.getPassword(), // Agregar el password que faltaba
                 department,
                 role,
                 entity.getHireDate(),

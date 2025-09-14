@@ -88,6 +88,7 @@ public class EmployeeService {
                 request.firstName(),
                 request.lastName(),
                 request.email(),
+                "$2a$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2uheWG/igi.", // password123 encriptado
                 department,
                 role,
                 request.hireDate() != null ? request.hireDate() : LocalDate.now(),
@@ -182,6 +183,7 @@ public class EmployeeService {
                 request.firstName(),
                 request.lastName(),
                 request.email(),
+                existingEmployee.getPassword(), // Mantener la contraseña existente
                 department,
                 role,
                 request.hireDate() != null ? request.hireDate() : existingEmployee.getHireDate(),
