@@ -211,11 +211,13 @@ public class EmployeeService {
     }
 
     private boolean isValidEmail(String email) {
-        return email.contains("@") && email.contains(".") &&
-               email.length() > 5 &&
-               email.indexOf("@") > 0 &&
-               email.indexOf("@") < email.lastIndexOf(".") &&
-               email.lastIndexOf(".") < email.length() - 1;
+        if (email == null || email.trim().isEmpty()) {
+            return false;
+        }
+
+        // Patrón regex más robusto para validar emails
+        String emailRegex = "^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$";
+        return email.matches(emailRegex);
     }
 
     // Mappers
