@@ -63,6 +63,12 @@ public class SecurityConfig {
                 .requestMatchers("/auth/**").permitAll()
                 .requestMatchers("/api/auth/**").permitAll()
                 .requestMatchers("/h2-console/**").permitAll() // Para testing
+                
+                // Swagger/OpenAPI documentation
+                .requestMatchers("/swagger-ui/**").permitAll()
+                .requestMatchers("/swagger-ui.html").permitAll()
+                .requestMatchers("/api-docs/**").permitAll()
+                .requestMatchers("/v3/api-docs/**").permitAll()
 
                 // Rutas administrativas
                 .requestMatchers("/api/reports/**").hasRole("ADMIN")
