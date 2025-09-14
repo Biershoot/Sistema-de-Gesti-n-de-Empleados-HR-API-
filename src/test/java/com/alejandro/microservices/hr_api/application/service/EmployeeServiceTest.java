@@ -65,6 +65,7 @@ class EmployeeServiceTest {
                 "Juan",
                 "Pérez",
                 "juan.perez@empresa.com",
+                "hashedPassword123",
                 department,
                 role,
                 LocalDate.of(2023, 1, 15),

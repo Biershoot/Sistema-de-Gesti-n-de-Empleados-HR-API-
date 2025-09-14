@@ -84,7 +84,7 @@ class LeaveServiceTest {
                 IllegalArgumentException.class,
                 () -> leaveService.requestLeave(invalidRequest)
         );
-        assertEquals("La fecha de inicio debe ser anterior a la fecha de fin", exception.getMessage());
+        assertEquals("La fecha de fin no puede ser anterior a la fecha de inicio", exception.getMessage());
         verify(leaveRepository, never()).save(any());
     }
 

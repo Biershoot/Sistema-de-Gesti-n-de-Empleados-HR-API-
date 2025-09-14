@@ -200,7 +200,7 @@ class EmployeeValidationTest {
     private Employee buildEmployee(UUID id, String email) {
         Department dept = new Department(UUID.randomUUID(), "IT");
         Role role = new Role(UUID.randomUUID(), "Developer");
-        return new Employee(id, "John", "Doe", email, dept, role, LocalDate.now(), 15);
+        return new Employee(id, "John", "Doe", email, "hashedPassword123", dept, role, LocalDate.now(), 15);
     }
 
     private Department buildDepartment() {

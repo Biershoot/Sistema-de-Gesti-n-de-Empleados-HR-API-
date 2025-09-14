@@ -5,6 +5,7 @@ import com.alejandro.microservices.hr_api.domain.model.Department;
 import com.alejandro.microservices.hr_api.domain.model.Employee;
 import com.alejandro.microservices.hr_api.domain.model.Leave;
 import com.alejandro.microservices.hr_api.domain.model.LeaveType;
+import com.alejandro.microservices.hr_api.domain.model.Role;
 import com.alejandro.microservices.hr_api.domain.repository.DepartmentRepository;
 import com.alejandro.microservices.hr_api.domain.repository.EmployeeRepository;
 import com.alejandro.microservices.hr_api.domain.repository.LeaveRepository;
@@ -44,6 +45,8 @@ class ReportServiceTest {
     private UUID employeeId1;
     private UUID employeeId2;
     private Department mockDepartment;
+    private Role mockRole1;
+    private Role mockRole2;
     private Employee mockEmployee1;
     private Employee mockEmployee2;
     private Leave mockLeave1;
@@ -56,15 +59,17 @@ class ReportServiceTest {
         employeeId2 = UUID.randomUUID();
 
         mockDepartment = new Department(departmentId, "Desarrollo");
+        mockRole1 = new Role(UUID.randomUUID(), "Developer");
+        mockRole2 = new Role(UUID.randomUUID(), "Manager");
 
         mockEmployee1 = new Employee(
-                employeeId1, "Juan", "Pérez", "juan@test.com",
-                mockDepartment, null, LocalDate.now(), 15
+                employeeId1, "Juan", "Pérez", "juan@test.com", "hashedPassword123",
+                mockDepartment, mockRole1, LocalDate.now(), 15
         );
 
         mockEmployee2 = new Employee(
-                employeeId2, "María", "García", "maria@test.com",
-                mockDepartment, null, LocalDate.now(), 20
+                employeeId2, "María", "García", "maria@test.com", "hashedPassword456",
+                mockDepartment, mockRole2, LocalDate.now(), 20
         );
 
         mockLeave1 = new Leave(
