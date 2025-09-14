@@ -19,6 +19,23 @@ import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+/**
+ * Servicio de aplicación para la gestión de empleados.
+ *
+ * Esta clase implementa los casos de uso del sistema relacionados con empleados,
+ * siguiendo los principios de la Arquitectura Hexagonal donde los servicios
+ * de aplicación coordinan las operaciones entre el dominio y la infraestructura.
+ *
+ * Responsabilidades:
+ * - Orquestar operaciones CRUD de empleados
+ * - Validar reglas de negocio
+ * - Coordinar con repositorios de dominio
+ * - Transformar entre DTOs y entidades de dominio
+ * - Gestionar vacaciones de empleados
+ *
+ * @author Sistema HR API
+ * @version 1.0
+ */
 @Service
 public class EmployeeService {
 
@@ -26,6 +43,13 @@ public class EmployeeService {
     private final DepartmentRepository departmentRepository;
     private final RoleRepository roleRepository;
 
+    /**
+     * Constructor con inyección de dependencias.
+     *
+     * @param employeeRepository Repositorio para operaciones de empleados
+     * @param departmentRepository Repositorio para operaciones de departamentos
+     * @param roleRepository Repositorio para operaciones de roles
+     */
     public EmployeeService(EmployeeRepository employeeRepository,
                            DepartmentRepository departmentRepository,
                            RoleRepository roleRepository) {
@@ -34,14 +58,30 @@ public class EmployeeService {
         this.roleRepository = roleRepository;
     }
 
+    /**
+     * Crea un nuevo empleado en el sistema.
+     *
+     * Validaciones aplicadas:
+     * - Email único
+     * - Departamento existente
+     * - Rol existente
+     * - Datos requeridos completos
+     *
+     * @param request DTO con los datos del empleado a crear
+     * @return DTO con los datos del empleado creado
+     * @throws IllegalArgumentException si la validación falla
+     */
     public EmployeeResponseDTO createEmployee(EmployeeRequestDTO request) {
+        // Validar datos de entrada
         validateEmployeeRequest(request);
 
+        // Verificar existencia de departamento y rol
         Department department = departmentRepository.findById(request.departmentId())
                 .orElseThrow(() -> new IllegalArgumentException("Departamento no encontrado"));
         Role role = roleRepository.findById(request.roleId())
                 .orElseThrow(() -> new IllegalArgumentException("Rol no encontrado"));
 
+        // Crear entidad de dominio con lógica de negocio
         Employee employee = new Employee(
                 UUID.randomUUID(),
                 request.firstName(),
@@ -50,11 +90,12 @@ public class EmployeeService {
                 department,
                 role,
                 request.hireDate() != null ? request.hireDate() : LocalDate.now(),
-                Math.max(request.vacationDays(), 0) // Asegurar que no sea negativo, con 0 como mínimo
+                request.vacationDays() > 0 ? request.vacationDays() : 15 // Días por defecto
         );
 
-        Employee savedEmployee = employeeRepository.save(employee);
-        return mapToResponseDTO(savedEmployee);
+        // Persistir y retornar resultado
+        employeeRepository.save(employee);
+        return mapToResponseDTO(employee);
     }
 
     public EmployeeResponseDTO createEmployee(String firstName, String lastName, String email,
@@ -139,42 +180,96 @@ public class EmployeeService {
         employeeRepository.deleteById(id);
     }
 
+    /**
+     * Procesa la solicitud de vacaciones de un empleado.
+     *
+     * Este método delega la lógica de negocio a la entidad Employee,
+     * siguiendo los principios de DDD donde el dominio contiene
+     * las reglas de negocio.
+     *
+     * @param employeeId ID del empleado
+     * @param days Número de días de vacaciones a tomar
+     * @return DTO actualizado del empleado
+     * @throws IllegalArgumentException si el empleado no existe o no tiene días suficientes
+     */
     public EmployeeResponseDTO takeVacation(UUID employeeId, int days) {
+        // Validar ID del empleado primero
         validateId(employeeId, "El ID del empleado no puede ser nulo");
+
+        // Validar días de vacaciones
         validateVacationDays(days, "Los días de vacaciones deben ser positivos");
 
         Employee employee = employeeRepository.findById(employeeId)
                 .orElseThrow(() -> new IllegalArgumentException("Empleado no encontrado"));
 
+        // La lógica de negocio está en la entidad de dominio
         employee.takeVacation(days);
-        Employee savedEmployee = employeeRepository.save(employee);
-        return mapToResponseDTO(savedEmployee);
+
+        employeeRepository.save(employee);
+        return mapToResponseDTO(employee);
     }
 
+    /**
+     * Agrega días de vacaciones a un empleado.
+     *
+     * @param employeeId ID del empleado
+     * @param days Número de días a agregar
+     * @return DTO actualizado del empleado
+     */
     public EmployeeResponseDTO addVacationDays(UUID employeeId, int days) {
+        // Validar ID del empleado primero
         validateId(employeeId, "El ID del empleado no puede ser nulo");
+
+        // Validar días a agregar
         validateVacationDays(days, "Los días a agregar deben ser positivos");
 
         Employee employee = employeeRepository.findById(employeeId)
                 .orElseThrow(() -> new IllegalArgumentException("Empleado no encontrado"));
 
         employee.addVacationDays(days);
-        Employee savedEmployee = employeeRepository.save(employee);
-        return mapToResponseDTO(savedEmployee);
+
+        employeeRepository.save(employee);
+        return mapToResponseDTO(employee);
     }
 
     // Métodos de validación privados
+    /**
+     * Valida los datos de entrada para la creación/actualización de empleados.
+     *
+     * @param request DTO con los datos a validar
+     * @throws IllegalArgumentException si alguna validación falla
+     */
     private void validateEmployeeRequest(EmployeeRequestDTO request) {
+        // Validar que el request no sea nulo
         if (request == null) {
             throw new IllegalArgumentException("Los datos del empleado no pueden ser nulos");
         }
-        validateBasicEmployeeData(request.firstName(), request.lastName(),
-                                request.email(), request.departmentId(), request.roleId());
 
+        if (request.firstName() == null || request.firstName().trim().isEmpty()) {
+            throw new IllegalArgumentException("El nombre no puede estar vacío");
+        }
+        if (request.lastName() == null || request.lastName().trim().isEmpty()) {
+            throw new IllegalArgumentException("El apellido no puede estar vacío");
+        }
+        if (request.email() == null || request.email().trim().isEmpty()) {
+            throw new IllegalArgumentException("El email no puede estar vacío");
+        }
+        if (!isValidEmail(request.email())) {
+            throw new IllegalArgumentException("El formato del email no es válido");
+        }
+        if (request.departmentId() == null) {
+            throw new IllegalArgumentException("El ID del departamento no puede ser nulo");
+        }
+        if (request.roleId() == null) {
+            throw new IllegalArgumentException("El ID del rol no puede ser nulo");
+        }
+
+        // Validar fechas de contratación futuras
         if (request.hireDate() != null && request.hireDate().isAfter(LocalDate.now())) {
             throw new IllegalArgumentException("La fecha de contratación no puede ser futura");
         }
 
+        // Validar días de vacaciones negativos
         if (request.vacationDays() < 0) {
             throw new IllegalArgumentException("Los días de vacaciones no pueden ser negativos");
         }

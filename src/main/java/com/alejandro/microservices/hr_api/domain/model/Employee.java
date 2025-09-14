@@ -3,6 +3,17 @@ package com.alejandro.microservices.hr_api.domain.model;
 import java.time.LocalDate;
 import java.util.UUID;
 
+/**
+ * Entidad de dominio que representa un empleado en el sistema de recursos humanos.
+ * Esta clase implementa la lógica de negocio relacionada con los empleados,
+ * incluyendo la gestión de días de vacaciones.
+ *
+ * Siguiendo los principios de Domain Driven Design (DDD), esta entidad
+ * encapsula tanto los datos como el comportamiento del empleado.
+ *
+ * @author Sistema HR API
+ * @version 1.0
+ */
 public class Employee {
 
     private UUID id;
@@ -14,6 +25,18 @@ public class Employee {
     private LocalDate hireDate;
     private int vacationDays;
 
+    /**
+     * Constructor para crear una nueva instancia de Employee.
+     *
+     * @param id Identificador único del empleado
+     * @param firstName Nombre del empleado
+     * @param lastName Apellido del empleado
+     * @param email Correo electrónico del empleado (debe ser único)
+     * @param department Departamento al que pertenece el empleado
+     * @param role Rol o posición del empleado
+     * @param hireDate Fecha de contratación
+     * @param vacationDays Días de vacaciones disponibles
+     */
     public Employee(UUID id, String firstName, String lastName, String email,
                     Department department, Role role, LocalDate hireDate, int vacationDays) {
         this.id = id;
@@ -59,7 +82,13 @@ public class Employee {
         return vacationDays;
     }
 
-    // Métodos de negocio
+    /**
+     * Método de negocio para tomar días de vacaciones.
+     * Aplica las reglas de negocio para la gestión de vacaciones.
+     *
+     * @param days Número de días de vacaciones a tomar
+     * @throws IllegalArgumentException si los días son <= 0 o exceden los días disponibles
+     */
     public void takeVacation(int days) {
         if (days <= 0) {
             throw new IllegalArgumentException("Los días deben ser positivos");
@@ -70,6 +99,12 @@ public class Employee {
         this.vacationDays -= days;
     }
 
+    /**
+     * Agrega días de vacaciones al empleado.
+     * Típicamente usado para el acumulado anual o ajustes administrativos.
+     *
+     * @param days Número de días a agregar (debe ser positivo)
+     */
     public void addVacationDays(int days) {
         if (days > 0) {
             this.vacationDays += days;
