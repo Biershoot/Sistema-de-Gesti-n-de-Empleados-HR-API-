@@ -1,4 +1,4 @@
-package com.alejandro.microservices.hr_api.domain.port;
+package com.alejandro.microservices.hr_api.domain.repository;
 
 import com.alejandro.microservices.hr_api.domain.model.Role;
 
