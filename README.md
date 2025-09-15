@@ -13,7 +13,6 @@
 
 [![Build Status](https://img.shields.io/badge/Build-Passing-brightgreen?style=for-the-badge)](#)
 [![Coverage](https://img.shields.io/badge/Coverage-85%25-green?style=for-the-badge)](#)
-[![License](https://img.shields.io/badge/License-MIT-blue?style=for-the-badge)](#)
 
 </div>
 
