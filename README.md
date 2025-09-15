@@ -31,7 +31,6 @@
 - [🧪 Testing](#-testing)
 - [📈 Métricas y Monitoreo](#-métricas-y-monitoreo)
 - [🤝 Contribución](#-contribución)
-- [📄 Licencia](#-licencia)
 
 ---
 
@@ -399,22 +398,6 @@ GET /actuator/info            # Información de la aplicación
 - 🧪 **Testing**: Escribir pruebas para nuevas funcionalidades
 - 📚 **Documentación**: Actualizar documentación cuando sea necesario
 - 🔍 **Code Review**: Todas las contribuciones requieren revisión
-
----
-
-## 📄 Licencia
-
-Este proyecto está bajo la Licencia MIT. Ver el archivo [LICENSE](LICENSE) para más detalles.
-
----
-
-## 👨‍💻 Autor
-
-**Alejandro Arango Calderón**
-- 📧 Email: alejandro@example.com
-- 💼 LinkedIn: [Alejandro Arango](https://linkedin.com/in/alejandro-arango)
-- 🐙 GitHub: [@alejandroarango-dev](https://github.com/alejandroarango-dev)
-- 🌐 Portfolio: [alejandroarango.dev](https://alejandroarango.dev)
 
 ---
 
