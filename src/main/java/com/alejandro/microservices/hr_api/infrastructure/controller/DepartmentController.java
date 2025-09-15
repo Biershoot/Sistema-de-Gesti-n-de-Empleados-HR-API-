@@ -10,6 +10,24 @@ import jakarta.validation.Valid;
 import java.util.List;
 import java.util.UUID;
 
+/**
+ * Controlador REST para la gestión de departamentos.
+ *
+ * Este controlador maneja todas las operaciones relacionadas con la gestión
+ * de departamentos en el sistema de recursos humanos, incluyendo creación,
+ * consulta, actualización y eliminación de departamentos.
+ *
+ * Endpoints disponibles:
+ * - POST /api/departments - Crear nuevo departamento
+ * - GET /api/departments - Listar todos los departamentos
+ * - GET /api/departments/{id} - Obtener departamento por ID
+ * - DELETE /api/departments/{id} - Eliminar departamento
+ *
+ * @author Sistema HR API
+ * @version 1.0
+ * @since 2025-01-14
+ */
+// @Tag(name = "Departments", description = "Operaciones relacionadas con la gestión de departamentos")
 @RestController
 @RequestMapping("/api/departments")
 @CrossOrigin(origins = "*")
@@ -17,6 +35,11 @@ public class DepartmentController {
 
     private final DepartmentService departmentService;
 
+    /**
+     * Constructor con inyección de dependencias del servicio de departamentos.
+     *
+     * @param departmentService Servicio que contiene la lógica de negocio para departamentos
+     */
     public DepartmentController(DepartmentService departmentService) {
         this.departmentService = departmentService;
     }

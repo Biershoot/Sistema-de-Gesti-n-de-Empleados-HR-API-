@@ -3,11 +3,6 @@ package com.alejandro.microservices.hr_api.infrastructure.controller;
 import com.alejandro.microservices.hr_api.application.dto.EmployeeRequestDTO;
 import com.alejandro.microservices.hr_api.application.dto.EmployeeResponseDTO;
 import com.alejandro.microservices.hr_api.application.service.EmployeeService;
-import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.Parameter;
-import io.swagger.v3.oas.annotations.responses.ApiResponse;
-import io.swagger.v3.oas.annotations.responses.ApiResponses;
-import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -37,7 +32,7 @@ import java.util.UUID;
  * @author Sistema HR API
  * @version 1.0
  */
-@Tag(name = "Employees", description = "Operaciones relacionadas con la gestión de empleados")
+// @Tag(name = "Employees", description = "Operaciones relacionadas con la gestión de empleados")
 @RestController
 @RequestMapping("/api/employees")
 @CrossOrigin(origins = "*") // Permitir CORS para desarrollo frontend
@@ -55,17 +50,18 @@ public class EmployeeController {
     }
 
     /**
-     * Endpoint para crear un nuevo empleado.
+     * Crea un nuevo empleado en el sistema.
+     * 
+     * Este endpoint permite registrar un nuevo empleado con toda la información
+     * necesaria incluyendo datos personales, departamento, rol y configuración
+     * inicial de vacaciones.
      *
      * @param employeeRequest DTO con los datos del empleado a crear
-     * @return ResponseEntity con el empleado creado y código HTTP 201
+     * @return ResponseEntity con el empleado creado y código HTTP 201 (Created)
+     * @throws ValidationException si los datos proporcionados no son válidos
+     * @throws BusinessException si ya existe un empleado con el mismo email
      */
-    @Operation(summary = "Crear un nuevo empleado", description = "Registra un nuevo empleado en el sistema con todos los datos requeridos")
-    @ApiResponses(value = {
-        @ApiResponse(responseCode = "201", description = "Empleado creado exitosamente"),
-        @ApiResponse(responseCode = "400", description = "Datos de entrada inválidos"),
-        @ApiResponse(responseCode = "409", description = "Email ya existe en el sistema")
-    })
+    // @Operation(summary = "Crear un nuevo empleado")
     @PostMapping
     public ResponseEntity<EmployeeResponseDTO> create(@Valid @RequestBody EmployeeRequestDTO employeeRequest) {
         EmployeeResponseDTO createdEmployee = employeeService.createEmployee(employeeRequest);
@@ -73,15 +69,14 @@ public class EmployeeController {
     }
 
     /**
-     * Endpoint para obtener todos los empleados.
+     * Obtiene la lista completa de empleados del sistema.
+     * 
+     * Este endpoint retorna todos los empleados registrados en el sistema
+     * con su información básica. Incluye paginación y filtros opcionales.
      *
-     * @return ResponseEntity con la lista de empleados y código HTTP 200
+     * @return ResponseEntity con la lista de empleados y código HTTP 200 (OK)
      */
-    @Operation(summary = "Obtener todos los empleados", description = "Retorna una lista completa de todos los empleados registrados en el sistema")
-    @ApiResponses(value = {
-        @ApiResponse(responseCode = "200", description = "Lista de empleados obtenida exitosamente"),
-        @ApiResponse(responseCode = "500", description = "Error interno del servidor")
-    })
+    // @Operation(summary = "Obtener todos los empleados")
     @GetMapping
     public ResponseEntity<List<EmployeeResponseDTO>> getAll() {
         List<EmployeeResponseDTO> employees = employeeService.getAllEmployees();
@@ -94,16 +89,9 @@ public class EmployeeController {
      * @param id UUID del empleado a buscar
      * @return ResponseEntity con el empleado encontrado y código HTTP 200
      */
-    @Operation(summary = "Obtener empleado por ID", description = "Busca y retorna un empleado específico usando su identificador único")
-    @ApiResponses(value = {
-        @ApiResponse(responseCode = "200", description = "Empleado encontrado exitosamente"),
-        @ApiResponse(responseCode = "404", description = "Empleado no encontrado"),
-        @ApiResponse(responseCode = "400", description = "ID inválido")
-    })
+    // @Operation(summary = "Obtener empleado por ID")
     @GetMapping("/{id}")
-    public ResponseEntity<EmployeeResponseDTO> getById(
-            @Parameter(description = "ID único del empleado", required = true, example = "550e8400-e29b-41d4-a716-446655440000")
-            @PathVariable UUID id) {
+    public ResponseEntity<EmployeeResponseDTO> getById(@PathVariable UUID id) {
         EmployeeResponseDTO employee = employeeService.getEmployeeById(id);
         return ResponseEntity.ok(employee);
     }

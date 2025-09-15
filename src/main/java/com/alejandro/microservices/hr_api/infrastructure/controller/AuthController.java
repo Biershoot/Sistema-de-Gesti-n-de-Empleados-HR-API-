@@ -4,11 +4,6 @@ import com.alejandro.microservices.hr_api.application.dto.AuthResponseDTO;
 import com.alejandro.microservices.hr_api.application.dto.LoginRequestDTO;
 import com.alejandro.microservices.hr_api.application.dto.RegisterRequestDTO;
 import com.alejandro.microservices.hr_api.application.service.AuthService;
-import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.Parameter;
-import io.swagger.v3.oas.annotations.responses.ApiResponse;
-import io.swagger.v3.oas.annotations.responses.ApiResponses;
-import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -32,7 +27,7 @@ import java.util.Map;
  * @version 1.0
  * @since 2025-01-14
  */
-@Tag(name = "Authentication", description = "Operaciones de autenticación y registro de usuarios")
+// @Tag(name = "Authentication", description = "Operaciones de autenticación y registro de usuarios")
 @RestController
 @RequestMapping("/api/auth")
 @CrossOrigin(origins = "*", maxAge = 3600)
@@ -46,16 +41,17 @@ public class AuthController {
 
     /**
      * Registra un nuevo usuario en el sistema.
+     * 
+     * Este endpoint permite crear una nueva cuenta de usuario con validación
+     * de datos, verificación de unicidad de email/username y generación
+     * automática de token JWT para autenticación inmediata.
      *
-     * @param request Datos del nuevo usuario (validados)
+     * @param request DTO con los datos del nuevo usuario (username, email, password, role)
      * @return ResponseEntity con el token JWT y datos del usuario registrado
+     * @throws ValidationException si los datos proporcionados no son válidos
+     * @throws BusinessException si el email o username ya están en uso
      */
-    @Operation(summary = "Registrar nuevo usuario", description = "Crea una nueva cuenta de usuario en el sistema y retorna un token JWT")
-    @ApiResponses(value = {
-        @ApiResponse(responseCode = "201", description = "Usuario registrado exitosamente"),
-        @ApiResponse(responseCode = "400", description = "Datos de entrada inválidos o usuario ya existe"),
-        @ApiResponse(responseCode = "500", description = "Error interno del servidor")
-    })
+    // @Operation(summary = "Registrar nuevo usuario")
     @PostMapping("/register")
     public ResponseEntity<?> register(@Valid @RequestBody RegisterRequestDTO request) {
         try {

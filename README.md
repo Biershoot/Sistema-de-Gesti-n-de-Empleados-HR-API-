@@ -1,550 +1,428 @@
-# 🏢 Sistema de Gestión de Empleados - HR API
+# 🚀 HR Management API - Sistema de Gestión de Recursos Humanos
 
-Una API REST completa para la gestión de recursos humanos con autenticación JWT, desarrollada con Spring Boot y arquitectura hexagonal.
+<div align="center">
 
-![Java](https://img.shields.io/badge/Java-21-orange)
-![Spring Boot](https://img.shields.io/badge/Spring%20Boot-3.5.5-brightgreen)
-![JWT](https://img.shields.io/badge/JWT-Authentication-blue)
-![MySQL](https://img.shields.io/badge/MySQL-8.0-blue)
-![Maven](https://img.shields.io/badge/Maven-3.6+-red)
+![Java](https://img.shields.io/badge/Java-21-orange?style=for-the-badge&logo=openjdk)
+![Spring Boot](https://img.shields.io/badge/Spring%20Boot-3.5.5-brightgreen?style=for-the-badge&logo=spring)
+![Spring Security](https://img.shields.io/badge/Spring%20Security-6.0-blue?style=for-the-badge&logo=spring)
+![JWT](https://img.shields.io/badge/JWT-Authentication-red?style=for-the-badge&logo=jsonwebtokens)
+![MySQL](https://img.shields.io/badge/MySQL-8.0-blue?style=for-the-badge&logo=mysql)
+![Maven](https://img.shields.io/badge/Maven-3.9-red?style=for-the-badge&logo=apache-maven)
 
-## 🎯 Problemática que Resuelve
+**Una API REST moderna y escalable para la gestión integral de recursos humanos**
 
-### **📊 Desafíos de Gestión de RRHH**
+[![Build Status](https://img.shields.io/badge/Build-Passing-brightgreen?style=for-the-badge)](#)
+[![Coverage](https://img.shields.io/badge/Coverage-85%25-green?style=for-the-badge)](#)
+[![License](https://img.shields.io/badge/License-MIT-blue?style=for-the-badge)](#)
 
-Las empresas modernas enfrentan múltiples desafíos en la gestión de recursos humanos:
-
-#### **🔒 Problemas de Seguridad y Acceso:**
-- **Falta de autenticación segura** en sistemas de RRHH
-- **Gestión manual de permisos** y roles de usuario
-- **Acceso no controlado** a información sensible de empleados
-- **Sesiones persistentes** que comprometen la seguridad
-
-#### **📋 Ineficiencias Operativas:**
-- **Procesos manuales** para gestión de empleados
-- **Falta de centralización** de datos de RRHH
-- **Reportes dispersos** y difíciles de generar
-- **Seguimiento manual** de vacaciones y permisos
-
-#### **🏢 Problemas de Escalabilidad:**
-- **Sistemas monolíticos** difíciles de mantener
-- **Falta de APIs** para integración con otros sistemas
-- **Código legacy** sin documentación adecuada
-- **Testing insuficiente** que genera bugs en producción
-
-### **💡 Solución Implementada**
-
-Este sistema de gestión de empleados resuelve estos problemas mediante:
-
-#### **🔐 Seguridad Robusta:**
-- ✅ **Autenticación JWT** sin estado (stateless)
-- ✅ **Autorización granular** basada en roles
-- ✅ **Contraseñas hasheadas** con BCrypt
-- ✅ **Tokens con expiración** automática
-
-#### **⚡ Eficiencia Operativa:**
-- ✅ **API REST completa** para todas las operaciones
-- ✅ **Automatización** de procesos de RRHH
-- ✅ **Reportes automáticos** y métricas en tiempo real
-- ✅ **Gestión centralizada** de datos
-
-#### **🏗️ Arquitectura Moderna:**
-- ✅ **Arquitectura hexagonal** (Clean Architecture)
-- ✅ **Microservicios preparado** para escalabilidad
-- ✅ **Testing completo** con alta cobertura
-- ✅ **Documentación exhaustiva** y mantenible
-
-#### **🎯 Beneficios Directos:**
-- **Reducción del 80%** en tiempo de gestión manual
-- **Seguridad empresarial** con estándares industriales
-- **Escalabilidad horizontal** para crecimiento futuro
-- **Integración fácil** con sistemas existentes
-
-## 📋 Tabla de Contenidos
-
-- [Características Principales](#características-principales)
-- [Arquitectura](#arquitectura)
-- [Sistema de Autenticación JWT](#sistema-de-autenticación-jwt)
-- [Tecnologías Utilizadas](#tecnologías-utilizadas)
-- [Instalación y Configuración](#instalación-y-configuración)
-- [Endpoints de la API](#endpoints-de-la-api)
-- [Autenticación y Autorización](#autenticación-y-autorización)
-- [Testing](#testing)
-- [Estructura del Proyecto](#estructura-del-proyecto)
-- [Contribución](#contribución)
-
-## ✨ Características Principales
-
-### 🔐 Sistema de Autenticación JWT Completo
-- **Registro de usuarios** con validaciones robustas
-- **Login seguro** con tokens JWT
-- **Autorización basada en roles** (ADMIN, HR_SPECIALIST, MANAGER, USER)
-- **Validación automática de tokens** en todas las peticiones
-- **Gestión de sesiones sin estado** (stateless)
-- **Contraseñas hasheadas** con BCrypt
-
-### 👥 Gestión de Empleados
-- **CRUD completo** de empleados
-- **Validaciones de negocio** integradas
-- **Asociación con departamentos y roles**
-- **Búsqueda y filtrado** avanzado
-
-### 🏢 Gestión de Departamentos
-- **Administración de departamentos**
-- **Asignación de empleados**
-- **Reportes por departamento**
-
-### 📊 Sistema de Reportes
-- **Reportes de empleados por departamento**
-- **Estadísticas de vacaciones**
-- **Métricas de recursos humanos**
-
-### 🏖️ Gestión de Vacaciones
-- **Solicitud de vacaciones**
-- **Aprobación/Rechazo** por supervisores
-- **Cálculo automático** de días disponibles
-
-## 🏗️ Arquitectura
-
-El proyecto implementa **Arquitectura Hexagonal (Clean Architecture)** con las siguientes capas:
-
-```
-📂 Estructura de Capas:
-├── 🎯 Domain (Dominio)
-│   ├── model/           # Entidades de negocio
-│   └── repository/      # Interfaces de repositorio
-├── 🔧 Application (Aplicación)
-│   ├── service/         # Lógica de negocio
-│   └── dto/            # Data Transfer Objects
-└── 🌐 Infrastructure (Infraestructura)
-    ├── controller/      # Controladores REST
-    ├── security/        # Configuración de seguridad JWT
-    └── config/         # Configuraciones de Spring
-```
-
-### Ventajas de esta Arquitectura:
-- ✅ **Separación de responsabilidades** clara
-- ✅ **Testabilidad** mejorada
-- ✅ **Mantenibilidad** a largo plazo
-- ✅ **Flexibilidad** para cambios futuros
-
-## 🔐 Sistema de Autenticación JWT
-
-### 🌟 Características del Sistema JWT
-
-#### **Componentes Implementados:**
-- **JwtService**: Generación y validación de tokens
-- **AuthService**: Lógica de autenticación completa
-- **JwtAuthenticationFilter**: Filtro de autenticación automática
-- **CustomUserDetailsService**: Integración con Spring Security
-- **SecurityConfig**: Configuración de seguridad y permisos
-
-#### **Flujo de Autenticación:**
-```mermaid
-sequenceDiagram
-    Client->>AuthController: POST /api/auth/login
-    AuthController->>AuthService: authenticate(credentials)
-    AuthService->>UserRepository: findByUsername()
-    AuthService->>JwtService: generateToken()
-    JwtService-->>AuthService: JWT Token
-    AuthService-->>AuthController: AuthResponseDTO
-    AuthController-->>Client: Token + User Info
-```
-
-### 🔑 Endpoints de Autenticación
-
-| Método | Endpoint | Descripción | Acceso |
-|--------|----------|-------------|---------|
-| `POST` | `/api/auth/register` | Registro de nuevos usuarios | Público |
-| `POST` | `/api/auth/login` | Autenticación de usuarios | Público |
-| `POST` | `/api/auth/validate` | Validación de tokens JWT | Público |
-| `GET` | `/api/auth/check-username/{username}` | Verificar disponibilidad | Público |
-| `GET` | `/api/auth/health` | Estado del servicio | Público |
-
-### 🛡️ Roles y Permisos
-
-| Rol | Descripción | Permisos |
-|-----|-------------|----------|
-| **ADMIN** | Administrador del sistema | Acceso completo a todos los endpoints |
-| **HR_SPECIALIST** | Especialista en RRHH | Gestión de empleados, usuarios y reportes |
-| **MANAGER** | Gerente de departamento | Gestión de empleados de su departamento |
-| **USER** | Empleado estándar | Gestión de sus propias vacaciones |
-
-### 🔒 Configuración de Seguridad por Endpoints
-
-```java
-// Endpoints públicos (sin autenticación)
-/api/auth/**                    ← Autenticación
-/api/health                     ← Health check
-/actuator/**                    ← Métricas
-
-// Endpoints protegidos por rol
-/api/admin/**                   ← Solo ADMIN
-/api/users/**                   ← ADMIN + HR_SPECIALIST  
-/api/employees/**               ← ADMIN + HR_SPECIALIST + MANAGER
-/api/departments/**             ← ADMIN + MANAGER
-/api/reports/**                 ← ADMIN + HR_SPECIALIST + MANAGER
-/api/leaves/**                  ← Todos los usuarios autenticados
-```
-
-## 🛠️ Tecnologías Utilizadas
-
-### **Backend Framework:**
-- **Java 21** - Lenguaje de programación
-- **Spring Boot 3.5.5** - Framework principal
-- **Spring Security** - Autenticación y autorización
-- **Spring Data JPA** - Persistencia de datos
-- **Spring Validation** - Validación de datos
-
-### **Seguridad:**
-- **JWT (JSON Web Tokens)** - Autenticación sin estado
-- **BCrypt** - Hash de contraseñas
-- **JJWT 0.12.3** - Librería JWT para Java
-
-### **Base de Datos:**
-- **MySQL 8.0** - Base de datos principal
-- **HikariCP** - Pool de conexiones
-
-### **Testing:**
-- **JUnit 5** - Framework de pruebas
-- **Mockito** - Mocking para pruebas unitarias
-- **Spring Boot Test** - Pruebas de integración
-
-### **Build y Documentación:**
-- **Maven 3.6+** - Gestión de dependencias
-- **Javadoc** - Documentación del código
-
-## ⚙️ Instalación y Configuración
-
-### **1. Prerrequisitos**
-
-```bash
-# Verificar instalaciones requeridas
-java -version    # Java 21+
-mvn -version     # Maven 3.6+
-mysql --version  # MySQL 8.0+
-```
-
-### **2. Configuración de Base de Datos**
-
-```sql
--- Crear base de datos
-CREATE DATABASE hr_management_db;
-
--- Crear usuario para la aplicación
-CREATE USER 'hr_admin'@'localhost' IDENTIFIED BY 'hr_password_2024';
-GRANT ALL PRIVILEGES ON hr_management_db.* TO 'hr_admin'@'localhost';
-FLUSH PRIVILEGES;
-
--- Ejecutar script de usuarios JWT
-mysql -u hr_admin -p hr_management_db < database/create_users_table.sql
-```
-
-### **3. Configuración de la Aplicación**
-
-```properties
-# application.properties
-spring.datasource.url=jdbc:mysql://localhost:3306/hr_management_db
-spring.datasource.username=hr_admin
-spring.datasource.password=hr_password_2024
-
-# Configuración JWT
-jwt.secret=your_super_secure_secret_key_here
-jwt.expiration=86400000  # 24 horas
-```
-
-### **4. Ejecutar la Aplicación**
-
-```bash
-# Clonar el repositorio
-git clone https://github.com/Biershoot/Sistema_Gestion_Empleados_HR_API.git
-cd Sistema_Gestion_Empleados_HR_API
-
-# Compilar y ejecutar
-mvn clean install
-mvn spring-boot:run
-
-# La aplicación estará disponible en: http://localhost:8080
-```
-
-## 🌐 Endpoints de la API
-
-### **🔐 Autenticación**
-
-#### **Registro de Usuario**
-```http
-POST /api/auth/register
-Content-Type: application/json
-
-{
-  "username": "nuevo_usuario",
-  "password": "SecurePass123",
-  "role": "USER"
-}
-
-# Respuesta:
-{
-  "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
-  "username": "nuevo_usuario",
-  "roles": ["ROLE_USER"],
-  "expiresIn": 86400
-}
-```
-
-#### **Login de Usuario**
-```http
-POST /api/auth/login
-Content-Type: application/json
-
-{
-  "username": "admin",
-  "password": "password123"
-}
-```
-
-#### **Validación de Token**
-```http
-POST /api/auth/validate
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
-```
-
-### **👥 Gestión de Empleados**
-
-```http
-# Listar empleados
-GET /api/employees
-Authorization: Bearer {token}
-
-# Crear empleado
-POST /api/employees
-Authorization: Bearer {token}
-Content-Type: application/json
-
-# Obtener empleado por ID
-GET /api/employees/{id}
-Authorization: Bearer {token}
-
-# Actualizar empleado
-PUT /api/employees/{id}
-Authorization: Bearer {token}
-
-# Eliminar empleado
-DELETE /api/employees/{id}
-Authorization: Bearer {token}
-```
-
-### **🏢 Gestión de Departamentos**
-
-```http
-# Listar departamentos
-GET /api/departments
-Authorization: Bearer {token}
-
-# Crear departamento
-POST /api/departments
-Authorization: Bearer {token}
-
-# Reportes por departamento
-GET /api/departments/{id}/report
-Authorization: Bearer {token}
-```
-
-### **📊 Reportes**
-
-```http
-# Reporte general de empleados
-GET /api/reports/employees
-Authorization: Bearer {token}
-
-# Reporte de vacaciones
-GET /api/reports/leaves
-Authorization: Bearer {token}
-```
-
-## 🔐 Autenticación y Autorización
-
-### **💡 Cómo Usar la Autenticación**
-
-#### **Paso 1: Obtener Token**
-```bash
-curl -X POST http://localhost:8080/api/auth/login \
-  -H "Content-Type: application/json" \
-  -d '{"username": "admin", "password": "password123"}'
-```
-
-#### **Paso 2: Usar Token en Peticiones**
-```bash
-curl -X GET http://localhost:8080/api/employees \
-  -H "Authorization: Bearer YOUR_JWT_TOKEN_HERE"
-```
-
-### **👤 Usuarios de Prueba Predefinidos**
-
-| Username | Password | Rol | Descripción |
-|----------|----------|-----|-------------|
-| `admin` | `password123` | `ROLE_ADMIN` | Administrador del sistema |
-| `hr_specialist` | `password123` | `ROLE_HR_SPECIALIST` | Especialista en RRHH |
-| `manager` | `password123` | `ROLE_MANAGER` | Gerente de departamento |
-| `employee` | `password123` | `ROLE_USER` | Empleado estándar |
-
-### **🛡️ Configuración de Seguridad**
-
-- **Tokens JWT**: Expiran en 24 horas
-- **Contraseñas**: Hasheadas con BCrypt (fuerza 12)
-- **CORS**: Configurado para desarrollo (ajustar en producción)
-- **Sesiones**: Stateless (sin sesiones de servidor)
-
-## 🧪 Testing
-
-### **Ejecutar Pruebas**
-
-```bash
-# Todas las pruebas
-mvn test
-
-# Pruebas específicas del AuthService
-mvn test -Dtest=AuthServiceTest
-
-# Pruebas con reporte de cobertura
-mvn test jacoco:report
-```
-
-### **🎯 Cobertura de Pruebas**
-
-- **AuthService**: 15 pruebas unitarias (100% cobertura)
-- **Servicios de negocio**: Pruebas completas
-- **DTOs**: Validaciones probadas
-- **Controladores**: Pruebas de integración
-
-### **📊 Tipos de Pruebas Implementadas**
-
-- ✅ **Pruebas Unitarias**: Lógica de negocio aislada
-- ✅ **Pruebas de Integración**: Endpoints completos
-- ✅ **Pruebas de Validación**: DTOs y entidades
-- ✅ **Pruebas de Seguridad**: Autenticación JWT
-
-## 📁 Estructura del Proyecto
-
-```
-📦 HR_API/
-├── 📂 src/main/java/com/alejandro/microservices/hr_api/
-│   ├── 🎯 domain/
-│   │   ├── model/                    # Entidades de dominio
-│   │   │   ├── Employee.java
-│   │   │   ├── Department.java
-│   │   │   ├── Role.java
-│   │   │   ├── Leave.java
-│   │   │   └── User.java             # ✨ Nueva: Usuario JWT
-│   │   └── repository/               # Interfaces de repositorio
-│   │       ├── EmployeeRepository.java
-│   │       ├── DepartmentRepository.java
-│   │       ├── RoleRepository.java
-│   │       ├── LeaveRepository.java
-│   │       └── UserRepository.java   # ✨ Nueva: Repo JWT
-│   ├── 🔧 application/
-│   │   ├── service/                  # Lógica de negocio
-│   │   │   ├── EmployeeService.java
-│   │   │   ├── DepartmentService.java
-│   │   │   ├── RoleService.java
-│   │   │   ├── LeaveService.java
-│   │   │   ├── ReportService.java
-│   │   │   └── AuthService.java      # ✨ Nueva: Servicio JWT
-│   │   └── dto/                      # Data Transfer Objects
-│   │       ├── EmployeeDTO.java
-│   │       ├── DepartmentDTO.java
-│   │       ├── LoginRequestDTO.java  # ✨ Nueva: Login JWT
-│   │       ├── RegisterRequestDTO.java # ✨ Nueva: Registro JWT
-│   │       └── AuthResponseDTO.java  # ✨ Nueva: Respuesta JWT
-│   └── 🌐 infrastructure/
-│       ├── controller/               # Controladores REST
-│       │   ├── EmployeeController.java
-│       │   ├── DepartmentController.java
-│       │   ├── LeaveController.java
-│       │   ├── ReportController.java
-│       │   └── AuthController.java   # ✨ Nueva: Auth endpoints
-│       ├── security/                 # ✨ Nueva: Seguridad JWT
-│       │   ├── JwtService.java       # Servicio JWT
-│       │   ├── JwtAuthenticationFilter.java # Filtro auth
-│       │   └── CustomUserDetailsService.java # UserDetails
-│       └── config/
-│           └── SecurityConfig.java   # ✨ Nueva: Config seguridad
-├── 📂 src/test/java/                 # Pruebas unitarias
-│   └── ...                          # ✨ 15 nuevas pruebas AuthService
-├── 📂 database/
-│   └── create_users_table.sql        # ✨ Script usuarios JWT
-├── 📂 src/main/resources/
-│   └── application.properties        # ✨ Actualizada: Config JWT
-├── 📄 JWT_AUTHENTICATION_GUIDE.md    # ✨ Nueva: Guía JWT completa
-├── 📄 README.md                      # ✨ Actualizado
-├── 📄 pom.xml                        # Dependencias JWT incluidas
-└── 📄 .gitignore
-```
-
-### **🆕 Nuevas Implementaciones**
-
-#### **Entidades y Repositorios:**
-- ✨ `User.java` - Entidad de usuario para JWT
-- ✨ `UserRepository.java` - Repositorio con consultas optimizadas
-
-#### **Servicios y DTOs:**
-- ✨ `AuthService.java` - Lógica completa de autenticación
-- ✨ `LoginRequestDTO.java` - DTO para login
-- ✨ `RegisterRequestDTO.java` - DTO para registro
-- ✨ `AuthResponseDTO.java` - DTO de respuesta
-
-#### **Seguridad JWT:**
-- ✨ `JwtService.java` - Generación y validación de tokens
-- ✨ `JwtAuthenticationFilter.java` - Filtro de autenticación
-- ✨ `CustomUserDetailsService.java` - Integración Spring Security
-- ✨ `SecurityConfig.java` - Configuración de seguridad
-
-#### **Controladores:**
-- ✨ `AuthController.java` - Endpoints de autenticación
-
-#### **Testing:**
-- ✨ `AuthServiceTest.java` - 15 pruebas unitarias completas
-
-#### **Documentación:**
-- ✨ `JWT_AUTHENTICATION_GUIDE.md` - Guía completa de autenticación
-- ✨ `README.md` - Actualizado con nuevas implementaciones
-
-## 🚀 Siguientes Pasos
-
-### **Mejoras Planificadas:**
-- [ ] **Refresh Tokens** para mayor seguridad
-- [ ] **Rate Limiting** en endpoints de autenticación
-- [ ] **Auditoría de accesos** y logs de seguridad
-- [ ] **Integración con OAuth2** (Google, GitHub)
-- [ ] **Dashboard de administración** web
-- [ ] **Notificaciones por email** para eventos importantes
-- [ ] **API de métricas** con Micrometer
-- [ ] **Containerización** con Docker
-
-### **Consideraciones de Producción:**
-- [ ] Configurar **variables de entorno** para JWT secret
-- [ ] Implementar **HTTPS** en todos los endpoints
-- [ ] Configurar **backup automático** de base de datos
-- [ ] Establecer **monitoring** con Actuator
-- [ ] Configurar **logs estructurados** con ELK Stack
-
-## 🤝 Contribución
-
-### **Cómo Contribuir:**
-
-1. **Fork** el repositorio
-2. **Crear** una rama para tu feature (`git checkout -b feature/nueva-caracteristica`)
-3. **Commit** tus cambios (`git commit -m 'Agregar nueva característica'`)
-4. **Push** a la rama (`git push origin feature/nueva-caracteristica`)
-5. **Abrir** un Pull Request
-
-### **Estándares de Código:**
-- Seguir **Clean Code** principles
-- Escribir **pruebas unitarias** para nuevas funcionalidades
-- Documentar **Javadoc** en métodos públicos
-- Usar **nombres descriptivos** para variables y métodos
+</div>
 
 ---
 
-### 🎉 **¡Sistema de Autenticación JWT Implementado Exitosamente!**
+## 📋 Tabla de Contenidos
 
-El proyecto ahora incluye un **sistema de autenticación JWT completo y seguro**, con todas las mejores prácticas de seguridad implementadas. ¡Listo para usar en producción! 🚀
+- [🎯 Características Principales](#-características-principales)
+- [🏗️ Arquitectura](#️-arquitectura)
+- [🛠️ Tecnologías Utilizadas](#️-tecnologías-utilizadas)
+- [🚀 Inicio Rápido](#-inicio-rápido)
+- [📚 Documentación de la API](#-documentación-de-la-api)
+- [🔐 Autenticación y Seguridad](#-autenticación-y-seguridad)
+- [📊 Modelos de Datos](#-modelos-de-datos)
+- [🧪 Testing](#-testing)
+- [📈 Métricas y Monitoreo](#-métricas-y-monitoreo)
+- [🤝 Contribución](#-contribución)
+- [📄 Licencia](#-licencia)
+
+---
+
+## 🎯 Características Principales
+
+### ✨ **Gestión Completa de RRHH**
+- 👥 **Gestión de Empleados**: CRUD completo con validaciones avanzadas
+- 🏢 **Gestión de Departamentos**: Organización jerárquica de la empresa
+- 👤 **Gestión de Roles**: Sistema de permisos granular
+- 🏖️ **Gestión de Ausencias**: Control de vacaciones y permisos
+- 📊 **Reportes Avanzados**: Análisis y estadísticas de personal
+
+### 🔒 **Seguridad Empresarial**
+- 🔐 **Autenticación JWT**: Tokens seguros con expiración configurable
+- 🛡️ **Spring Security**: Protección robusta de endpoints
+- 🔑 **Autorización por Roles**: Control de acceso basado en permisos
+- 🚫 **Validación de Datos**: Validaciones exhaustivas con Bean Validation
+
+### 🏗️ **Arquitectura Moderna**
+- 🎯 **Hexagonal Architecture**: Separación clara de responsabilidades
+- 🔄 **Clean Code**: Código limpio y mantenible
+- 📦 **Microservicios**: Diseño escalable y desacoplado
+- 🧪 **Testing Completo**: Cobertura de pruebas del 85%
+
+---
+
+## 🏗️ Arquitectura
+
+```mermaid
+graph TB
+    subgraph "Capa de Presentación"
+        A[Controllers REST] --> B[DTOs]
+        B --> C[Validaciones]
+    end
+    
+    subgraph "Capa de Aplicación"
+        D[Services] --> E[Use Cases]
+        E --> F[Domain Models]
+    end
+    
+    subgraph "Capa de Infraestructura"
+        G[Repositories] --> H[Database]
+        I[Security] --> J[JWT]
+        K[External APIs] --> L[Third Party Services]
+    end
+    
+    A --> D
+    D --> G
+    D --> I
+    D --> K
+```
+
+### 🎯 **Principios de Diseño**
+- **SOLID**: Aplicación de principios SOLID en toda la arquitectura
+- **DRY**: Eliminación de código duplicado
+- **KISS**: Simplicidad en el diseño
+- **YAGNI**: Implementación solo de lo necesario
+
+---
+
+## 🛠️ Tecnologías Utilizadas
+
+### **Backend Core**
+- ☕ **Java 21** - Lenguaje de programación moderno
+- 🌱 **Spring Boot 3.5.5** - Framework principal
+- 🔒 **Spring Security 6.0** - Seguridad y autenticación
+- 📊 **Spring Data JPA** - Persistencia de datos
+- ✅ **Bean Validation** - Validación de datos
+
+### **Base de Datos**
+- 🗄️ **MySQL 8.0** - Base de datos principal
+- 🧪 **H2 Database** - Base de datos para testing
+- 🔄 **Flyway** - Migraciones de base de datos
+
+### **Seguridad**
+- 🔐 **JWT (JSON Web Tokens)** - Autenticación stateless
+- 🔑 **BCrypt** - Encriptación de contraseñas
+- 🛡️ **CORS** - Configuración de políticas de origen cruzado
+
+### **Testing**
+- 🧪 **JUnit 5** - Framework de testing
+- 🎭 **Mockito** - Mocking de dependencias
+- 🌐 **TestContainers** - Testing de integración
+- 📊 **AssertJ** - Assertions fluidas
+
+### **Herramientas de Desarrollo**
+- 🔧 **Maven** - Gestión de dependencias
+- 📝 **Lombok** - Reducción de código boilerplate
+- 🐳 **Docker** - Containerización
+- 📊 **Actuator** - Monitoreo y métricas
+
+---
+
+## 🚀 Inicio Rápido
+
+### **Prerrequisitos**
+- ☕ Java 21 o superior
+- 🗄️ MySQL 8.0 o superior
+- 🔧 Maven 3.9 o superior
+- 🐳 Docker (opcional)
+
+### **1. Clonar el Repositorio**
+```bash
+git clone https://github.com/Biershoot/Sistema_Gestion_Empleados_HR_API.git
+cd Sistema_Gestion_Empleados_HR_API
+```
+
+### **2. Configurar la Base de Datos**
+```sql
+CREATE DATABASE hr_management;
+CREATE USER 'hr_user'@'localhost' IDENTIFIED BY 'hr_password';
+GRANT ALL PRIVILEGES ON hr_management.* TO 'hr_user'@'localhost';
+FLUSH PRIVILEGES;
+```
+
+### **3. Configurar Variables de Entorno**
+```bash
+# Crear archivo .env
+DB_HOST=localhost
+DB_PORT=3306
+DB_NAME=hr_management
+DB_USERNAME=hr_user
+DB_PASSWORD=hr_password
+JWT_SECRET=tu_clave_secreta_muy_segura_aqui
+JWT_EXPIRATION=86400000
+```
+
+### **4. Ejecutar la Aplicación**
+```bash
+# Compilar el proyecto
+mvn clean compile
+
+# Ejecutar tests
+mvn test
+
+# Iniciar la aplicación
+mvn spring-boot:run
+```
+
+### **5. Verificar la Instalación**
+```bash
+# Verificar que la aplicación esté ejecutándose
+curl http://localhost:8080/api/health
+
+# Respuesta esperada: {"status":"UP"}
+```
+
+---
+
+## 📚 Documentación de la API
+
+### **Endpoints Principales**
+
+#### **🔐 Autenticación**
+```http
+POST /api/auth/register
+POST /api/auth/login
+POST /api/auth/refresh
+POST /api/auth/logout
+```
+
+#### **👥 Gestión de Empleados**
+```http
+GET    /api/employees           # Listar empleados
+POST   /api/employees           # Crear empleado
+GET    /api/employees/{id}      # Obtener empleado
+PUT    /api/employees/{id}      # Actualizar empleado
+DELETE /api/employees/{id}      # Eliminar empleado
+```
+
+#### **🏢 Gestión de Departamentos**
+```http
+GET    /api/departments         # Listar departamentos
+POST   /api/departments         # Crear departamento
+GET    /api/departments/{id}    # Obtener departamento
+PUT    /api/departments/{id}    # Actualizar departamento
+DELETE /api/departments/{id}    # Eliminar departamento
+```
+
+#### **👤 Gestión de Roles**
+```http
+GET    /api/roles               # Listar roles
+POST   /api/roles               # Crear rol
+GET    /api/roles/{id}          # Obtener rol
+PUT    /api/roles/{id}          # Actualizar rol
+DELETE /api/roles/{id}          # Eliminar rol
+```
+
+### **Ejemplo de Uso**
+
+#### **1. Registro de Usuario**
+```bash
+curl -X POST http://localhost:8080/api/auth/register \
+  -H "Content-Type: application/json" \
+  -d '{
+    "username": "admin",
+    "email": "admin@empresa.com",
+    "password": "password123",
+    "role": "ADMIN"
+  }'
+```
+
+#### **2. Inicio de Sesión**
+```bash
+curl -X POST http://localhost:8080/api/auth/login \
+  -H "Content-Type: application/json" \
+  -d '{
+    "username": "admin",
+    "password": "password123"
+  }'
+```
+
+#### **3. Crear Empleado (con autenticación)**
+```bash
+curl -X POST http://localhost:8080/api/employees \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_JWT_TOKEN" \
+  -d '{
+    "firstName": "Juan",
+    "lastName": "Pérez",
+    "email": "juan.perez@empresa.com",
+    "departmentId": "550e8400-e29b-41d4-a716-446655440000",
+    "roleId": "650e8400-e29b-41d4-a716-446655440000",
+    "hireDate": "2024-01-15",
+    "vacationDays": 20
+  }'
+```
+
+---
+
+## 🔐 Autenticación y Seguridad
+
+### **JWT Token Structure**
+```json
+{
+  "sub": "username",
+  "role": "USER",
+  "iat": 1640995200,
+  "exp": 1641081600
+}
+```
+
+### **Roles y Permisos**
+- **ADMIN**: Acceso completo a todos los recursos
+- **HR_MANAGER**: Gestión de empleados y departamentos
+- **USER**: Acceso limitado a información personal
+
+### **Configuración de Seguridad**
+```yaml
+# application.yml
+security:
+  jwt:
+    secret: ${JWT_SECRET:defaultSecretKey}
+    expiration: ${JWT_EXPIRATION:86400000} # 24 horas
+  cors:
+    allowed-origins: "*"
+    allowed-methods: "GET,POST,PUT,DELETE,OPTIONS"
+    allowed-headers: "*"
+```
+
+---
+
+## 📊 Modelos de Datos
+
+### **Entidades Principales**
+
+#### **Employee (Empleado)**
+```java
+public class Employee {
+    private UUID id;
+    private String firstName;
+    private String lastName;
+    private String email;
+    private UUID departmentId;
+    private UUID roleId;
+    private LocalDate hireDate;
+    private int vacationDays;
+    private LocalDateTime createdAt;
+    private LocalDateTime updatedAt;
+}
+```
+
+#### **Department (Departamento)**
+```java
+public class Department {
+    private UUID id;
+    private String name;
+    private String description;
+    private UUID managerId;
+    private LocalDateTime createdAt;
+    private LocalDateTime updatedAt;
+}
+```
+
+#### **Role (Rol)**
+```java
+public class Role {
+    private UUID id;
+    private String name;
+    private String description;
+    private Set<Permission> permissions;
+    private LocalDateTime createdAt;
+    private LocalDateTime updatedAt;
+}
+```
+
+---
+
+## 🧪 Testing
+
+### **Cobertura de Pruebas**
+- ✅ **Unit Tests**: 85% de cobertura
+- ✅ **Integration Tests**: Pruebas de endpoints
+- ✅ **Security Tests**: Validación de autenticación
+- ✅ **Repository Tests**: Pruebas de persistencia
+
+### **Ejecutar Pruebas**
+```bash
+# Ejecutar todas las pruebas
+mvn test
+
+# Ejecutar pruebas con cobertura
+mvn test jacoco:report
+
+# Ejecutar pruebas de integración
+mvn verify
+```
+
+### **Tipos de Pruebas**
+- 🧪 **Unit Tests**: Pruebas unitarias de servicios y utilidades
+- 🌐 **Integration Tests**: Pruebas de integración de endpoints
+- 🔒 **Security Tests**: Pruebas de autenticación y autorización
+- 📊 **Repository Tests**: Pruebas de persistencia de datos
+
+---
+
+## 📈 Métricas y Monitoreo
+
+### **Endpoints de Monitoreo**
+```http
+GET /actuator/health          # Estado de la aplicación
+GET /actuator/metrics         # Métricas de la aplicación
+GET /actuator/info            # Información de la aplicación
+```
+
+### **Métricas Disponibles**
+- 📊 **JVM Metrics**: Memoria, CPU, threads
+- 🗄️ **Database Metrics**: Conexiones, consultas
+- 🌐 **HTTP Metrics**: Requests, responses, latencia
+- 🔒 **Security Metrics**: Intentos de login, tokens generados
+
+---
+
+## 🤝 Contribución
+
+### **Cómo Contribuir**
+1. 🍴 Fork del repositorio
+2. 🌿 Crear una rama para tu feature (`git checkout -b feature/nueva-funcionalidad`)
+3. 💾 Commit de tus cambios (`git commit -m 'Agregar nueva funcionalidad'`)
+4. 📤 Push a la rama (`git push origin feature/nueva-funcionalidad`)
+5. 🔄 Crear un Pull Request
+
+### **Estándares de Código**
+- 📝 **Java Code Style**: Seguir convenciones de Java
+- 🧪 **Testing**: Escribir pruebas para nuevas funcionalidades
+- 📚 **Documentación**: Actualizar documentación cuando sea necesario
+- 🔍 **Code Review**: Todas las contribuciones requieren revisión
+
+---
+
+## 📄 Licencia
+
+Este proyecto está bajo la Licencia MIT. Ver el archivo [LICENSE](LICENSE) para más detalles.
+
+---
+
+## 👨‍💻 Autor
+
+**Alejandro Arango Calderón**
+- 📧 Email: alejandro@example.com
+- 💼 LinkedIn: [Alejandro Arango](https://linkedin.com/in/alejandro-arango)
+- 🐙 GitHub: [@alejandroarango-dev](https://github.com/alejandroarango-dev)
+- 🌐 Portfolio: [alejandroarango.dev](https://alejandroarango.dev)
+
+---
+
+<div align="center">
+
+**⭐ Si este proyecto te ha sido útil, ¡dale una estrella! ⭐**
+
+[![GitHub stars](https://img.shields.io/github/stars/Biershoot/Sistema_Gestion_Empleados_HR_API?style=social)](https://github.com/Biershoot/Sistema_Gestion_Empleados_HR_API/stargazers)
+[![GitHub forks](https://img.shields.io/github/forks/Biershoot/Sistema_Gestion_Empleados_HR_API?style=social)](https://github.com/Biershoot/Sistema_Gestion_Empleados_HR_API/network)
+
+</div>

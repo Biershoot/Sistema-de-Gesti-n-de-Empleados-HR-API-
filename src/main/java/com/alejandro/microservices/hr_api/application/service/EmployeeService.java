@@ -27,15 +27,23 @@ import java.util.stream.Collectors;
  * siguiendo los principios de la Arquitectura Hexagonal donde los servicios
  * de aplicación coordinan las operaciones entre el dominio y la infraestructura.
  *
- * Responsabilidades:
- * - Orquestar operaciones CRUD de empleados
- * - Validar reglas de negocio
- * - Coordinar con repositorios de dominio
- * - Transformar entre DTOs y entidades de dominio
- * - Gestionar vacaciones de empleados
+ * <p>Este servicio actúa como intermediario entre la capa de presentación (controladores)
+ * y la capa de dominio, implementando la lógica de negocio específica para la
+ * gestión de empleados en el sistema de recursos humanos.</p>
+ *
+ * <p>Responsabilidades principales:</p>
+ * <ul>
+ *   <li>Creación y registro de nuevos empleados</li>
+ *   <li>Consulta y búsqueda de empleados existentes</li>
+ *   <li>Actualización de información de empleados</li>
+ *   <li>Eliminación de empleados del sistema</li>
+ *   <li>Gestión de vacaciones y permisos</li>
+ *   <li>Validación de reglas de negocio</li>
+ * </ul>
  *
  * @author Sistema HR API
  * @version 1.0
+ * @since 2025-01-14
  */
 @Service
 public class EmployeeService {
@@ -45,15 +53,15 @@ public class EmployeeService {
     private final RoleRepository roleRepository;
 
     /**
-     * Constructor con inyección de dependencias.
+     * Constructor con inyección de dependencias de los repositorios necesarios.
      *
-     * @param employeeRepository Repositorio para operaciones de empleados
-     * @param departmentRepository Repositorio para operaciones de departamentos
-     * @param roleRepository Repositorio para operaciones de roles
+     * @param employeeRepository Repositorio para operaciones de persistencia de empleados
+     * @param departmentRepository Repositorio para consultas de departamentos
+     * @param roleRepository Repositorio para consultas de roles
      */
     public EmployeeService(EmployeeRepository employeeRepository,
-                           DepartmentRepository departmentRepository,
-                           RoleRepository roleRepository) {
+                          DepartmentRepository departmentRepository,
+                          RoleRepository roleRepository) {
         this.employeeRepository = employeeRepository;
         this.departmentRepository = departmentRepository;
         this.roleRepository = roleRepository;
@@ -62,340 +70,240 @@ public class EmployeeService {
     /**
      * Crea un nuevo empleado en el sistema.
      *
-     * Validaciones aplicadas:
-     * - Email único
-     * - Departamento existente
-     * - Rol existente
-     * - Datos requeridos completos
+     * Este método implementa el caso de uso de creación de empleados, incluyendo
+     * validaciones de negocio, verificación de dependencias y persistencia de datos.
      *
      * @param request DTO con los datos del empleado a crear
-     * @return DTO con los datos del empleado creado
-     * @throws IllegalArgumentException si la validación falla
+     * @return DTO con la información del empleado creado
+     * @throws IllegalArgumentException si los datos proporcionados no son válidos
+     * @throws BusinessException si no se pueden cumplir las reglas de negocio
      */
     public EmployeeResponseDTO createEmployee(EmployeeRequestDTO request) {
-        // Validar datos de entrada
-        validateEmployeeRequest(request);
-
-        // Verificar existencia de departamento y rol
+        // Validar que el departamento existe
         Department department = departmentRepository.findById(request.departmentId())
                 .orElseThrow(() -> new IllegalArgumentException("Departamento no encontrado"));
+
+        // Validar que el rol existe
         Role role = roleRepository.findById(request.roleId())
                 .orElseThrow(() -> new IllegalArgumentException("Rol no encontrado"));
 
-        // Crear entidad de dominio con lógica de negocio
+        // Verificar que no existe un empleado con el mismo email
+        if (employeeRepository.findByEmail(request.email()).isPresent()) {
+            throw new IllegalArgumentException("Ya existe un empleado con este email");
+        }
+
+        // Crear la entidad empleado
         Employee employee = new Employee(
                 UUID.randomUUID(),
                 request.firstName(),
                 request.lastName(),
                 request.email(),
-                "$2a$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2uheWG/igi.", // password123 encriptado
+                "$2a$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2uheWG/igi.", // password por defecto
                 department,
                 role,
                 request.hireDate() != null ? request.hireDate() : LocalDate.now(),
-                request.vacationDays() > 0 ? request.vacationDays() : 15 // Días por defecto
+                request.vacationDays()
         );
 
-        // Persistir y retornar resultado
-        employeeRepository.save(employee);
-        return mapToResponseDTO(employee);
+        // Persistir el empleado
+        Employee savedEmployee = employeeRepository.save(employee);
+
+        // Convertir a DTO de respuesta
+        return convertToResponseDTO(savedEmployee, department, role);
     }
 
-    public EmployeeResponseDTO createEmployee(String firstName, String lastName, String email,
-                                            UUID departmentId, UUID roleId) {
-        validateBasicEmployeeData(firstName, lastName, email, departmentId, roleId);
-
-        EmployeeRequestDTO request = new EmployeeRequestDTO(
-                firstName, lastName, email, departmentId, roleId, LocalDate.now(), 15
-        );
-        return createEmployee(request);
-    }
-
+    /**
+     * Obtiene todos los empleados del sistema.
+     *
+     * @return Lista de DTOs con la información de todos los empleados
+     */
     public List<EmployeeResponseDTO> getAllEmployees() {
         return employeeRepository.findAll().stream()
-                .map(this::mapToResponseDTO)
+                .map(this::convertToResponseDTO)
                 .collect(Collectors.toList());
     }
 
-    public List<EmployeeDTO> getAllEmployeesBasic() {
-        return employeeRepository.findAll().stream()
-                .map(this::mapToDTO)
-                .collect(Collectors.toList());
-    }
-
+    /**
+     * Obtiene un empleado específico por su ID.
+     *
+     * @param id UUID del empleado a buscar
+     * @return DTO con la información del empleado
+     * @throws IllegalArgumentException si el empleado no existe
+     */
     public EmployeeResponseDTO getEmployeeById(UUID id) {
-        validateId(id, "El ID del empleado no puede ser nulo");
-
-        return employeeRepository.findById(id)
-                .map(this::mapToResponseDTO)
+        Employee employee = employeeRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Empleado no encontrado"));
+        return convertToResponseDTO(employee);
     }
 
-    public List<EmployeeResponseDTO> getEmployeesByDepartment(UUID departmentId) {
-        validateId(departmentId, "El ID del departamento no puede ser nulo");
-
-        return employeeRepository.findByDepartmentId(departmentId).stream()
-                .map(this::mapToResponseDTO)
-                .collect(Collectors.toList());
-    }
-
-    public List<EmployeeResponseDTO> getEmployeesByRole(UUID roleId) {
-        validateId(roleId, "El ID del rol no puede ser nulo");
-
-        return employeeRepository.findByRoleId(roleId).stream()
-                .map(this::mapToResponseDTO)
-                .collect(Collectors.toList());
-    }
-
+    /**
+     * Actualiza la información de un empleado existente.
+     *
+     * @param id UUID del empleado a actualizar
+     * @param request DTO con los nuevos datos del empleado
+     * @return DTO con la información actualizada del empleado
+     * @throws IllegalArgumentException si el empleado no existe o los datos no son válidos
+     */
     public EmployeeResponseDTO updateEmployee(UUID id, EmployeeRequestDTO request) {
-        validateId(id, "El ID del empleado no puede ser nulo");
-
-        // Validar datos básicos primero
-        if (request == null) {
-            throw new IllegalArgumentException("Los datos del empleado no pueden ser nulos");
-        }
-
-        if (request.firstName() == null || request.firstName().trim().isEmpty()) {
-            throw new IllegalArgumentException("El nombre no puede estar vacío");
-        }
-        if (request.lastName() == null || request.lastName().trim().isEmpty()) {
-            throw new IllegalArgumentException("El apellido no puede estar vacío");
-        }
-        if (request.email() == null || request.email().trim().isEmpty()) {
-            throw new IllegalArgumentException("El email no puede estar vacío");
-        }
-        if (!isValidEmail(request.email())) {
-            throw new IllegalArgumentException("El formato del email no es válido");
-        }
-
-        // VALIDACIÓN DE EMAIL ÚNICO para updates - excluir el empleado actual
-        validateUniqueEmail(request.email(), id);
-
-        Employee existingEmployee = employeeRepository.findById(id)
+        Employee employee = employeeRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Empleado no encontrado"));
 
-        Department department = departmentRepository.findById(request.departmentId())
-                .orElseThrow(() -> new IllegalArgumentException("Departamento no encontrado"));
-        Role role = roleRepository.findById(request.roleId())
-                .orElseThrow(() -> new IllegalArgumentException("Rol no encontrado"));
+        // Validar departamento si se proporciona
+        Department department = null;
+        if (request.departmentId() != null) {
+            department = departmentRepository.findById(request.departmentId())
+                    .orElseThrow(() -> new IllegalArgumentException("Departamento no encontrado"));
+        }
 
-        Employee updatedEmployee = new Employee(
-                id,
-                request.firstName(),
-                request.lastName(),
-                request.email(),
-                existingEmployee.getPassword(), // Mantener la contraseña existente
-                department,
-                role,
-                request.hireDate() != null ? request.hireDate() : existingEmployee.getHireDate(),
-                request.vacationDays() >= 0 ? request.vacationDays() : existingEmployee.getVacationDays()
-        );
+        // Validar rol si se proporciona
+        Role role = null;
+        if (request.roleId() != null) {
+            role = roleRepository.findById(request.roleId())
+                    .orElseThrow(() -> new IllegalArgumentException("Rol no encontrado"));
+        }
 
-        Employee savedEmployee = employeeRepository.save(updatedEmployee);
-        return mapToResponseDTO(savedEmployee);
+        // Actualizar campos si se proporcionan
+        if (request.firstName() != null) {
+            employee.setFirstName(request.firstName());
+        }
+        if (request.lastName() != null) {
+            employee.setLastName(request.lastName());
+        }
+        if (request.email() != null) {
+            employee.setEmail(request.email());
+        }
+        if (request.departmentId() != null) {
+            employee.setDepartment(department);
+        }
+        if (request.roleId() != null) {
+            employee.setRole(role);
+        }
+        if (request.hireDate() != null) {
+            employee.setHireDate(request.hireDate());
+        }
+        employee.setVacationDays(request.vacationDays());
+
+        // Persistir cambios
+        Employee updatedEmployee = employeeRepository.save(employee);
+
+        // Obtener departamento y rol actualizados
+        if (department == null) {
+            department = updatedEmployee.getDepartment();
+        }
+        if (role == null) {
+            role = updatedEmployee.getRole();
+        }
+
+        return convertToResponseDTO(updatedEmployee, department, role);
     }
 
+    /**
+     * Elimina un empleado del sistema.
+     *
+     * @param id UUID del empleado a eliminar
+     * @throws IllegalArgumentException si el empleado no existe
+     */
     public void deleteEmployee(UUID id) {
-        validateId(id, "El ID del empleado no puede ser nulo");
-
-        if (!employeeRepository.findById(id).isPresent()) {
+        if (employeeRepository.findById(id).isEmpty()) {
             throw new IllegalArgumentException("Empleado no encontrado");
         }
         employeeRepository.deleteById(id);
     }
 
     /**
-     * Procesa la solicitud de vacaciones de un empleado.
+     * Obtiene empleados por departamento.
      *
-     * Este método delega la lógica de negocio a la entidad Employee,
-     * siguiendo los principios de DDD donde el dominio contiene
-     * las reglas de negocio.
-     *
-     * @param employeeId ID del empleado
-     * @param days Número de días de vacaciones a tomar
-     * @return DTO actualizado del empleado
-     * @throws IllegalArgumentException si el empleado no existe o no tiene días suficientes
+     * @param departmentId UUID del departamento
+     * @return Lista de DTOs con los empleados del departamento
      */
-    public EmployeeResponseDTO takeVacation(UUID employeeId, int days) {
-        // Validar ID del empleado primero
-        validateId(employeeId, "El ID del empleado no puede ser nulo");
+    public List<EmployeeResponseDTO> getEmployeesByDepartment(UUID departmentId) {
+        return employeeRepository.findByDepartmentId(departmentId).stream()
+                .map(this::convertToResponseDTO)
+                .collect(Collectors.toList());
+    }
 
-        // Validar días de vacaciones
-        validateVacationDays(days, "Los días de vacaciones deben ser positivos");
+    /**
+     * Obtiene empleados por rol.
+     *
+     * @param roleId UUID del rol
+     * @return Lista de DTOs con los empleados del rol
+     */
+    public List<EmployeeResponseDTO> getEmployeesByRole(UUID roleId) {
+        return employeeRepository.findByRoleId(roleId).stream()
+                .map(this::convertToResponseDTO)
+                .collect(Collectors.toList());
+    }
 
-        Employee employee = employeeRepository.findById(employeeId)
+    /**
+     * Permite a un empleado tomar vacaciones.
+     *
+     * @param id UUID del empleado
+     * @param days Número de días de vacaciones a tomar
+     * @return DTO con la información actualizada del empleado
+     * @throws IllegalArgumentException si el empleado no existe o no tiene suficientes días
+     */
+    public EmployeeResponseDTO takeVacation(UUID id, int days) {
+        Employee employee = employeeRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Empleado no encontrado"));
 
-        // La lógica de negocio está en la entidad de dominio
-        employee.takeVacation(days);
+        if (employee.getVacationDays() < days) {
+            throw new IllegalArgumentException("No tiene suficientes días de vacaciones disponibles");
+        }
 
-        employeeRepository.save(employee);
-        return mapToResponseDTO(employee);
+        employee.setVacationDays(employee.getVacationDays() - days);
+        Employee updatedEmployee = employeeRepository.save(employee);
+
+        return convertToResponseDTO(updatedEmployee);
     }
 
     /**
      * Agrega días de vacaciones a un empleado.
      *
-     * @param employeeId ID del empleado
-     * @param days Número de días a agregar
-     * @return DTO actualizado del empleado
+     * @param id UUID del empleado
+     * @param days Número de días de vacaciones a agregar
+     * @return DTO con la información actualizada del empleado
+     * @throws IllegalArgumentException si el empleado no existe
      */
-    public EmployeeResponseDTO addVacationDays(UUID employeeId, int days) {
-        // Validar ID del empleado primero
-        validateId(employeeId, "El ID del empleado no puede ser nulo");
-
-        // Validar días a agregar
-        validateVacationDays(days, "Los días a agregar deben ser positivos");
-
-        Employee employee = employeeRepository.findById(employeeId)
+    public EmployeeResponseDTO addVacationDays(UUID id, int days) {
+        Employee employee = employeeRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Empleado no encontrado"));
 
-        employee.addVacationDays(days);
+        employee.setVacationDays(employee.getVacationDays() + days);
+        Employee updatedEmployee = employeeRepository.save(employee);
 
-        employeeRepository.save(employee);
-        return mapToResponseDTO(employee);
-    }
-
-    // Métodos de validación privados
-    /**
-     * Valida los datos de entrada para la creación/actualización de empleados.
-     *
-     * @param request DTO con los datos a validar
-     * @throws IllegalArgumentException si alguna validación falla
-     */
-    private void validateEmployeeRequest(EmployeeRequestDTO request) {
-        // Validar que el request no sea nulo
-        if (request == null) {
-            throw new IllegalArgumentException("Los datos del empleado no pueden ser nulos");
-        }
-
-        if (request.firstName() == null || request.firstName().trim().isEmpty()) {
-            throw new IllegalArgumentException("El nombre no puede estar vacío");
-        }
-        if (request.lastName() == null || request.lastName().trim().isEmpty()) {
-            throw new IllegalArgumentException("El apellido no puede estar vacío");
-        }
-        if (request.email() == null || request.email().trim().isEmpty()) {
-            throw new IllegalArgumentException("El email no puede estar vacío");
-        }
-        if (!isValidEmail(request.email())) {
-            throw new IllegalArgumentException("El formato del email no es válido");
-        }
-
-        // NUEVA VALIDACIÓN: Email único
-        validateUniqueEmail(request.email(), null);
-
-        if (request.departmentId() == null) {
-            throw new IllegalArgumentException("El ID del departamento no puede ser nulo");
-        }
-        if (request.roleId() == null) {
-            throw new IllegalArgumentException("El ID del rol no puede ser nulo");
-        }
-
-        // Validar fechas de contratación futuras
-        if (request.hireDate() != null && request.hireDate().isAfter(LocalDate.now())) {
-            throw new IllegalArgumentException("La fecha de contratación no puede ser futura");
-        }
-
-        // Validar días de vacaciones negativos
-        if (request.vacationDays() < 0) {
-            throw new IllegalArgumentException("Los días de vacaciones no pueden ser negativos");
-        }
-    }
-
-    private void validateBasicEmployeeData(String firstName, String lastName, String email,
-                                         UUID departmentId, UUID roleId) {
-        if (firstName == null || firstName.trim().isEmpty()) {
-            throw new IllegalArgumentException("El nombre no puede estar vacío");
-        }
-        if (lastName == null || lastName.trim().isEmpty()) {
-            throw new IllegalArgumentException("El apellido no puede estar vacío");
-        }
-        if (email == null || email.trim().isEmpty()) {
-            throw new IllegalArgumentException("El email no puede estar vacío");
-        }
-        if (!isValidEmail(email)) {
-            throw new IllegalArgumentException("El formato del email no es válido");
-        }
-
-        // NUEVA VALIDACIÓN: Email único
-        validateUniqueEmail(email, null);
-
-        validateId(departmentId, "El ID del departamento no puede ser nulo");
-        validateId(roleId, "El ID del rol no puede ser nulo");
+        return convertToResponseDTO(updatedEmployee);
     }
 
     /**
-     * Valida que el email sea único en el sistema.
+     * Convierte una entidad Employee a EmployeeResponseDTO.
      *
-     * @param email Email a validar
-     * @param excludeEmployeeId ID del empleado a excluir de la validación (para updates)
-     * @throws IllegalArgumentException si el email ya existe
+     * @param employee Entidad empleado
+     * @return DTO de respuesta
      */
-    private void validateUniqueEmail(String email, UUID excludeEmployeeId) {
-        Optional<Employee> existingEmployee = employeeRepository.findByEmail(email);
+    private EmployeeResponseDTO convertToResponseDTO(Employee employee) {
+        // Obtener departamento y rol directamente de la entidad
+        Department department = employee.getDepartment();
+        Role role = employee.getRole();
 
-        if (existingEmployee.isPresent()) {
-            // Si es una actualización, excluir el empleado actual
-            if (excludeEmployeeId == null || !existingEmployee.get().getId().equals(excludeEmployeeId)) {
-                throw new IllegalArgumentException("El correo ya está registrado para otro empleado");
-            }
-        }
+        return convertToResponseDTO(employee, department, role);
     }
 
-    private void validateId(UUID id, String message) {
-        if (id == null) {
-            throw new IllegalArgumentException(message);
-        }
-    }
-
-    private void validateVacationDays(int days, String message) {
-        if (days <= 0) {
-            throw new IllegalArgumentException(message);
-        }
-    }
-
-    private boolean isValidEmail(String email) {
-        if (email == null || email.trim().isEmpty()) {
-            return false;
-        }
-
-        // Patrón regex más robusto para validar emails
-        String emailRegex = "^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$";
-        return email.matches(emailRegex);
-    }
-
-    // Mappers
-    private EmployeeDTO mapToDTO(Employee employee) {
-        return new EmployeeDTO(
-                employee.getId(),
-                employee.getFirstName(),
-                employee.getLastName(),
-                employee.getEmail(),
-                employee.getDepartment().getId(),
-                employee.getRole().getId(),
-                employee.getHireDate(),
-                employee.getVacationDays()
-        );
-    }
-
-    private EmployeeResponseDTO mapToResponseDTO(Employee employee) {
-        DepartmentDTO departmentDTO = new DepartmentDTO(
-                employee.getDepartment().getId(),
-                employee.getDepartment().getName()
-        );
-
-        RoleDTO roleDTO = new RoleDTO(
-                employee.getRole().getId(),
-                employee.getRole().getName()
-        );
-
+    /**
+     * Convierte una entidad Employee a EmployeeResponseDTO con departamento y rol.
+     *
+     * @param employee Entidad empleado
+     * @param department Entidad departamento
+     * @param role Entidad rol
+     * @return DTO de respuesta
+     */
+    private EmployeeResponseDTO convertToResponseDTO(Employee employee, Department department, Role role) {
         return new EmployeeResponseDTO(
                 employee.getId(),
                 employee.getFirstName(),
                 employee.getLastName(),
                 employee.getEmail(),
-                departmentDTO,
-                roleDTO,
+                new DepartmentDTO(department.getId(), department.getName()),
+                new RoleDTO(role.getId(), role.getName()),
                 employee.getHireDate(),
                 employee.getVacationDays()
         );

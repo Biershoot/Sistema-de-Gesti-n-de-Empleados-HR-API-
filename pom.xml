@@ -92,12 +92,6 @@
       <artifactId>h2</artifactId>
       <scope>runtime</scope>
     </dependency>
-    <!-- Swagger OpenAPI -->
-    <dependency>
-      <groupId>org.springdoc</groupId>
-      <artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
-      <version>2.5.0</version>
-    </dependency>
   </dependencies>
 
   <build>
@@ -115,7 +109,8 @@
         </configuration>
       </plugin>
 
-      <!-- Plugin para ejecutar scripts SQL automáticamente -->
+      <!-- Plugin para ejecutar scripts SQL automáticamente - DESHABILITADO TEMPORALMENTE -->
+      <!--
       <plugin>
         <groupId>org.codehaus.mojo</groupId>
         <artifactId>sql-maven-plugin</artifactId>
@@ -136,7 +131,6 @@
           <skip>${maven.test.skip}</skip>
         </configuration>
         <executions>
-          <!-- Crear la base de datos -->
           <execution>
             <id>create-database</id>
             <phase>process-test-resources</phase>
@@ -148,7 +142,6 @@
               <onError>continue</onError>
             </configuration>
           </execution>
-          <!-- Ejecutar script completo de setup -->
           <execution>
             <id>setup-database</id>
             <phase>process-test-resources</phase>
@@ -165,6 +158,7 @@
           </execution>
         </executions>
       </plugin>
+      -->
 
       <plugin>
         <groupId>org.springframework.boot</groupId>
